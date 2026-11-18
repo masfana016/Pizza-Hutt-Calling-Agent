@@ -1,6 +1,6 @@
 import asyncio
 import base64
-# import hmac
+import hmac
 from twilio.request_validator import RequestValidator
 import json
 import os
