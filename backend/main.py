@@ -179,18 +179,18 @@ async def twilio_receiver(ws, audio_queue, streamsid_queue, call_ctx):
 async def twilio_ws_handler(request):
 
     # Reconstruct the exact public WebSocket URL
-    ws_url = PUBLIC_BASE_URL.replace(
-        "https://", "wss://", 1
-    ) + str(request.rel_url)
-
-    # Twilio's documented WebSocket signature workaround
-    signature_url = ws_url + "/"
     signature = request.headers.get("X-Twilio-Signature", "")
+    base = PUBLIC_BASE_URL + str(request.rel_url)
+    wss = base.replace("https://", "wss://", 1)
 
-    # Authenticate the WebSocket handshake
-    if not validate_twilio_request(signature_url, {}, signature):
-        print("Rejected unauthorized WebSocket connection")
+    # Try every URL form Twilio might have signed (all use the same auth token)
+    candidates = [wss, wss + "/", base, base + "/"]
+    matched = next((u for u in candidates if validate_twilio_request(u, {}, signature)), None)
+
+    if not matched:
+        print(f"Rejected unauthorized WebSocket connection (signature present: {bool(signature)})")
         return web.Response(status=403, text="Forbidden")
+    print(f"WebSocket signature OK with: {matched}")
 
     # Only authenticated connections reach this point
     ws = web.WebSocketResponse()

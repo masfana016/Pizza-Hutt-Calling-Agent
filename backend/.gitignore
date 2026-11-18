@@ -12,3 +12,6 @@ wheels/
 .venv/
 *.pyc
 "@ | Set-Content
+
+test_tools.py
+test.db
