@@ -132,7 +132,11 @@ async def sts_receiver(sts_ws, twilio_ws_send, streamsid_queue, call_ctx):
     async for message in sts_ws:
         if isinstance(message, str):
             decoded = json.loads(message)
-            print(f"Deepgram: {decoded.get('type')}")  # types only: transcripts hold customer data
+            msg_type = decoded.get("type")
+            if msg_type in ("Warning", "Error"):
+                print(f"Deepgram {msg_type}: {decoded}")  # these hold error details, not customer data
+            else:
+                print(f"Deepgram: {msg_type}")  # types only: transcripts hold customer data
             await handle_text_message(decoded, twilio_ws_send, sts_ws, streamsid, call_ctx)
             continue
 
