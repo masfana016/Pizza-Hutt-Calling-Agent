@@ -11,4 +11,5 @@ dependencies = [
     "python-dotenv>=1.2.4",
     "twilio>=9.13.0",
     "uvicorn>=0.54.0",
+    "websockets>=17.4",
 ]
