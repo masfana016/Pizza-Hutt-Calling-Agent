@@ -103,12 +103,31 @@ async def handle_function_call_request(decoded, sts_ws, call_ctx):
             print(f"Function {func_name} failed: {e}")
             result = {"error": "The system could not complete that request."}
 
-        await sts_ws.send(json.dumps({
+        print(
+            f"Thought signature present: "
+            f"{bool(fc.get('thought_signature'))}"
+            )
+
+        # await sts_ws.send(json.dumps({
+        #     "type": "FunctionCallResponse",
+        #     "id": func_id,
+        #     "name": func_name,
+        #     "content": json.dumps(result),
+        # }))
+        response = {
             "type": "FunctionCallResponse",
             "id": func_id,
             "name": func_name,
             "content": json.dumps(result),
-        }))
+        }
+
+        # Preserve Gemini thought signature if Deepgram provides it
+        thought_signature = fc.get("thought_signature")
+
+        if thought_signature is not None:
+            response["thought_signature"] = thought_signature
+
+        await sts_ws.send(json.dumps(response))
 
 
 async def handle_text_message(decoded, twilio_ws_send, sts_ws, streamsid, call_ctx):
