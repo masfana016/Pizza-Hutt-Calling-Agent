@@ -12,11 +12,12 @@
         }
     },
     "agent": {
-        "language": "en",
+        "language": "ur",
         "listen": {
             "provider": {
                 "type": "deepgram",
                 "model": "nova-3",
+                "language": "ur",
                 "keyterms": ["hello", "goodbye"]
             }
         },
