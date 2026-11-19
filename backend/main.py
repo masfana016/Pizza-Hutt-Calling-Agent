@@ -50,22 +50,34 @@ def sts_connect():
     )
 
 
+
 def load_config():
-    """Your existing config.json (audio, listen, speak, LLM endpoint) plus the Pizza Hut prompt and tools."""
+    """Load Deepgram configuration and Pizza Hut agent settings."""
+
     with open("config.json", "r") as f:
         config = json.load(f)
+
     with open("pizza_agent_config.json", "r") as f:
         pizza = json.load(f)
 
     google_api_key = os.getenv("GOOGLE_API_KEY")
     if not google_api_key:
-        raise Exception("GOOGLE_API_KEY not found in .env")
+        raise Exception("GOOGLE_API_KEY not found in environment variables")
 
     agent = config["agent"]
     agent["greeting"] = pizza["greeting"]
     agent["think"]["prompt"] = pizza["prompt"]
     agent["think"]["functions"] = pizza["functions"]
-    agent["think"]["endpoint"]["headers"]["authorization"] = f"Bearer {google_api_key}"
+
+    think = agent["think"]
+    headers = think["endpoint"].setdefault("headers", {})
+
+    if think["provider"]["type"] == "google":
+        headers["x-goog-api-key"] = google_api_key
+        headers.pop("authorization", None)
+    else:
+        headers["authorization"] = f"Bearer {google_api_key}"
+
     return config
 
 
