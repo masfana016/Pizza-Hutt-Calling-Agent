@@ -57,20 +57,12 @@ def load_config():
     with open("pizza_agent_config.json", "r") as f:
         pizza = json.load(f)
 
-    google_api_key = os.getenv("GOOGLE_API_KEY")
-    if not google_api_key:
-        raise Exception("GOOGLE_API_KEY not found in environment variables")
-
     agent = config["agent"]
     agent["greeting"] = pizza["greeting"]
     agent["think"]["prompt"] = pizza["prompt"]
     agent["think"]["functions"] = pizza["functions"]
 
-    headers = agent["think"]["endpoint"]["headers"]
-    headers["x-goog-api-key"] = google_api_key
-
     return config
-
 
 # =========================================================
 # BARGE-IN + FUNCTION CALLS
