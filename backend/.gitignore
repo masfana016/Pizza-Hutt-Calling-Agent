@@ -6,12 +6,9 @@ dist/
 wheels/
 *.egg-info
 
-# Virtual environments
-@"
 .env
 .venv/
 *.pyc
-"@ | Set-Content
 
 test_tools.py
 test.db
