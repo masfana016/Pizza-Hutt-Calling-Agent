@@ -13,3 +13,4 @@ wheels/
 test_tools.py
 test.db
 config.json
+config.txt
