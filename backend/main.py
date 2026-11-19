@@ -37,7 +37,7 @@ if not TWILIO_AUTH_TOKEN:
 
 validator = RequestValidator(TWILIO_AUTH_TOKEN)
 
-ORDER_TOOLS = {"place_order", "check_order_status", "cancel_order"}
+ORDER_TOOLS = {"place_order", "check_order_status", "cancel_order", "add_items_to_order"}
 
 
 def sts_connect():

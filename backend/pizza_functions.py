@@ -256,9 +256,41 @@ def cancel_order(order_id: int, customer_name: str = "", phone: str = "") -> dic
         return {"status": "cancelled", "order_id": order.id}
 
 
+def add_items_to_order(order_id: int, items: list, customer_name: str = "", phone: str = "") -> dict:
+    """Add items to an existing order that has not started preparation."""
+    if not items:
+        return {"error": "No items to add."}
+    with Session(engine) as session:
+        order = _owned_order(session, order_id, customer_name, phone)
+        if not order:
+            return NOT_FOUND
+        if order.status != "received":
+            return {"error": f"This order is already '{order.status}', so items can no longer be added. A new order is needed."}
+        lines, extra = [], 0.0
+        for it in items:
+            try:
+                qty = int(it.get("quantity", 1))
+            except (TypeError, ValueError):
+                return {"error": "Quantity must be a number."}
+            if not 1 <= qty <= MAX_QTY:
+                return {"error": f"Quantity must be between 1 and {MAX_QTY}."}
+            menu_item, err = _find_item(session, it.get("name", ""), it.get("size", ""))
+            if err:
+                return {"error": err}
+            lines.append((menu_item, qty))
+            extra += menu_item.price * qty
+        for menu_item, qty in lines:
+            session.add(OrderItem(order_id=order.id, name=menu_item.name, size=menu_item.size,
+                                  quantity=qty, unit_price=menu_item.price))
+        order.total = round(order.total + extra, 2)
+        session.add(order)
+        session.commit()
+        return {"status": "updated", "order_id": order.id, "new_total": order.total, "currency": "PKR"}
+
 FUNCTION_MAP = {
     "get_menu": get_menu,
     "place_order": place_order,
+    "add_items_to_order": add_items_to_order,
     "check_order_status": check_order_status,
     "cancel_order": cancel_order,
 }
